@@ -10,21 +10,21 @@
 #
 ################################################################################
 Profiles:
-    ChainHero:
+    LeadIQ:
         Orderer:
             <<: *OrdererDefaults
             Organizations:
-                - *ChainHero
+                - *LeadIQ
         Application:
             <<: *ApplicationDefaults
             Organizations:
-                - *Org1ChainHero
+                - *Org1LeadIQ
         Consortium: SampleConsortium
         Consortiums:
             SampleConsortium:
                 Organizations:
-                    - *ChainHero
-                    - *Org1ChainHero
+                    - *LeadIQ
+                    - *Org1LeadIQ
 
 ################################################################################
 #
@@ -35,19 +35,19 @@ Profiles:
 #
 ################################################################################
 Organizations:
-    - &ChainHero
-        Name: ChainHero
-        ID: hf.chainhero.io
+    - &LeadIQ
+        Name: LeadIQ
+        ID: hf.leadiq.com
         AdminPrincipal: Role.ADMIN
-        MSPDir: crypto-config/ordererOrganizations/hf.chainhero.io/msp
+        MSPDir: crypto-config/ordererOrganizations/hf.leadiq.com/msp
 
-    - &Org1ChainHero
-        Name: ChainHeroOrganization1
-        ID: org1.hf.chainhero.io
+    - &Org1LeadIQ
+        Name: LeadIQOrg1
+        ID: org1.hf.leadiq.com
         AdminPrincipal: Role.ADMIN
-        MSPDir: crypto-config/peerOrganizations/org1.hf.chainhero.io/msp
+        MSPDir: crypto-config/peerOrganizations/org1.hf.leadiq.com/msp
         AnchorPeers:
-            - Host: peer0.org1.hf.chainhero.io
+            - Host: peer0.org1.hf.leadiq.com
               Port: 7051
 
 ################################################################################
@@ -61,7 +61,7 @@ Organizations:
 Orderer: &OrdererDefaults
     OrdererType: solo
     Addresses:
-        - orderer.hf.chainhero.io:7050
+        - orderer.hf.leadiq.com:7050
     BatchTimeout: 5s
     # Batch Size: Controls the number of messages batched into a block.
     BatchSize:
