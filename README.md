@@ -13,7 +13,7 @@ For convenience only, we will create the network we used in our main [tutorial](
 Before doing anything let's create our working directory :
 
 ```bash
-mkdir -p $GOPATH/src/github.com/chainHero/heroes-service-network
+mkdir -p $GOPATH/src/github.com/leadiq/heroes-service-network
 ```
 
 ### b. Dependencies
@@ -25,8 +25,8 @@ You can either use the binaries we provide or download them from the official re
 #### Download them from our repository (Linux x64 ONLY):
 
 ```bash
-cd $GOPATH/src/github.com/chainHero/heroes-service-network && \
-svn checkout https://github.com/chainHero/heroes-service-network/branches/master/bin
+cd $GOPATH/src/github.com/leadiq/heroes-service-network && \
+svn checkout https://github.com/leadiq/heroes-service-network/branches/master/bin
 ```
 
 #### Download them from the official repository:
@@ -50,7 +50,7 @@ It will contains the network topology and allows us to generate a set of certifi
 Let's create it and start editing it :
 
 ```bash
-cd $GOPATH/src/github.com/chainHero/heroes-service-network && \
+cd $GOPATH/src/github.com/leadiq/heroes-service-network && \
 touch crypto-config.yaml && \
 vi crypto-config.yaml
 ```
@@ -60,15 +60,15 @@ And paste this inside :
 ```yaml
 # "OrdererOrgs" - Definition of organizations managing orderer nodes
 OrdererOrgs:
-  - Name: ChainHero
-    Domain: hf.chainhero.io
+  - Name: LeadIQ
+    Domain: hf.leadiq.com
     # Specs is an array of Spec entries.  Each Spec entry consists of two fields : Hostname and CommonName
     Specs:
       - Hostname: orderer
 # "PeerOrgs" - Definition of organizations managing peer nodes
 PeerOrgs:
-  - Name: Org1ChainHero
-    Domain: org1.hf.chainhero.io
+  - Name: Org1LeadIQ
+    Domain: org1.hf.leadiq.com
     # Allows for the definition of 1 or more hosts that are created sequentially
     # from a template. By default, this looks like "peer%d" from 0 to Count-1.
     # You may override the number of nodes (Count), the starting index (Start)
@@ -89,7 +89,7 @@ To do so we will use the **Cryptogen** tool to generate the cryptographic materi
 Let's now create a folder named `crypto-config` and use **cryptogen** to initialize our network :
 
 ```bash
-cd $GOPATH/src/github.com/chainHero/heroes-service-network && \
+cd $GOPATH/src/github.com/leadiq/heroes-service-network && \
 mkdir -p crypto-config && \
 ./bin/cryptogen generate --config=./crypto-config.yaml
 ```
@@ -107,7 +107,7 @@ In order for us to finish the initialization of our blockchain we need to create
 So let's create this by editing a configuration file named `configtx.yaml` :
 
 ```bash
-cd $GOPATH/src/github.com/chainHero/heroes-service-network && \
+cd $GOPATH/src/github.com/leadiq/heroes-service-network && \
 touch configtx.yaml && \
 vi configtx.yaml
 ```
@@ -127,21 +127,21 @@ Paste this inside :
 #
 ################################################################################
 Profiles:
-    ChainHero:
+    LeadIQ:
         Orderer:
             <<: *OrdererDefaults
             Organizations:
-                - *ChainHero
+                - *LeadIQ
         Application:
             <<: *ApplicationDefaults
             Organizations:
-                - *Org1ChainHero
+                - *Org1LeadIQ
         Consortium: SampleConsortium
         Consortiums:
             SampleConsortium:
                 Organizations:
-                    - *ChainHero
-                    - *Org1ChainHero
+                    - *LeadIQ
+                    - *Org1LeadIQ
 
 ################################################################################
 #
@@ -152,19 +152,19 @@ Profiles:
 #
 ################################################################################
 Organizations:
-    - &ChainHero
-        Name: ChainHero
-        ID: hf.chainhero.io
+    - &LeadIQ
+        Name: LeadIQ
+        ID: hf.leadiq.com
         AdminPrincipal: Role.ADMIN
-        MSPDir: crypto-config/ordererOrganizations/hf.chainhero.io/msp
+        MSPDir: crypto-config/ordererOrganizations/hf.leadiq.com/msp
 
-    - &Org1ChainHero
-        Name: ChainHeroOrganization1
-        ID: org1.hf.chainhero.io
+    - &Org1LeadIQ
+        Name: LeadIQOrg1
+        ID: org1.hf.leadiq.com
         AdminPrincipal: Role.ADMIN
-        MSPDir: crypto-config/peerOrganizations/org1.hf.chainhero.io/msp
+        MSPDir: crypto-config/peerOrganizations/org1.hf.leadiq.com/msp
         AnchorPeers:
-            - Host: peer0.org1.hf.chainhero.io
+            - Host: peer0.org1.hf.leadiq.com
               Port: 7051
 
 ################################################################################
@@ -178,7 +178,7 @@ Organizations:
 Orderer: &OrdererDefaults
     OrdererType: solo
     Addresses:
-        - orderer.hf.chainhero.io:7050
+        - orderer.hf.leadiq.com:7050
     BatchTimeout: 5s
     # Batch Size: Controls the number of messages batched into a block.
     BatchSize:
@@ -217,15 +217,15 @@ Application: &ApplicationDefaults
 Now that our configuration file is ready to use let's create the artifacts folder, which will contain the output files generated by the binary `configtxgen` :
 
 ```bash
-cd $GOPATH/src/github.com/chainHero/heroes-service-network && \
+cd $GOPATH/src/github.com/leadiq/heroes-service-network && \
 mkdir -p artifacts
 ```
 
 Then, let's use the provided binary and our configuration file to create our genesis block :
 
 ```bash
-cd $GOPATH/src/github.com/chainHero/heroes-service-network && \
-FABRIC_CFG_PATH=$PWD ./bin/configtxgen -profile ChainHero -outputBlock ./artifacts/orderer.genesis.block
+cd $GOPATH/src/github.com/leadiq/heroes-service-network && \
+FABRIC_CFG_PATH=$PWD ./bin/configtxgen -profile LeadIQ -outputBlock ./artifacts/orderer.genesis.block
 ```
 
 > Note that we have to set the environment variable `FABRIC_CFG_PATH` with the current working directoring (that contains the configuration) because the binary find the configuration file named `configtx.yaml` through this environment variable.
@@ -233,13 +233,13 @@ FABRIC_CFG_PATH=$PWD ./bin/configtxgen -profile ChainHero -outputBlock ./artifac
 Now that it have been created let's see how we create the channel :
 
 ```bash
-FABRIC_CFG_PATH=$PWD ./bin/configtxgen -profile ChainHero -outputCreateChannelTx ./artifacts/chainhero.channel.tx -channelID chainhero
+FABRIC_CFG_PATH=$PWD ./bin/configtxgen -profile LeadIQ -outputCreateChannelTx ./artifacts/leadiq.channel.tx -channelID leadiq
 ```
 
 Finally, we need a peer node which is called **the anchor peer** :
 
 ```bash
-FABRIC_CFG_PATH=$PWD ./bin/configtxgen -profile ChainHero -outputAnchorPeersUpdate ./artifacts/org1.chainhero.anchors.tx -channelID chainhero -asOrg ChainHeroOrganization1
+FABRIC_CFG_PATH=$PWD ./bin/configtxgen -profile LeadIQ -outputAnchorPeersUpdate ./artifacts/org1.leadiq.anchors.tx -channelID leadiq -asOrg LeadIQOrg1
 ```
 
 ## 3. Docker-Compose
@@ -249,8 +249,8 @@ an useful tool which will allow us to launch several dockers at the same time.
 
 If you need to install docker-compose then I'm going to redirect you to one of our tutorial in which we explain step by step how to install docker and docker-compose.
 
-- [Docker](https://github.com/chainHero/heroes-service#a-docker)
-- [Docker-compose](https://github.com/chainHero/heroes-service#b-docker-compose)
+- [Docker](https://github.com/leadiq/heroes-service#a-docker)
+- [Docker-compose](https://github.com/leadiq/heroes-service#b-docker-compose)
 
 Now that you are all caught up with the installation part we can move on and start the implementation of our network configuration.
 
@@ -264,17 +264,17 @@ networks:
 
 services:
 
-  orderer.hf.chainhero.io:
+  orderer.hf.leadiq.com:
     image: hyperledger/fabric-orderer:x86_64-1.0.5
-    container_name: orderer.hf.chainhero.io
+    container_name: orderer.hf.leadiq.com
     environment:
       - ORDERER_GENERAL_LOGLEVEL=debug
       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
       - ORDERER_GENERAL_LISTENPORT=7050
-      - ORDERER_GENERAL_GENESISPROFILE=ChainHero
+      - ORDERER_GENERAL_GENESISPROFILE=LeadIQ
       - ORDERER_GENERAL_GENESISMETHOD=file
       - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
-      - ORDERER_GENERAL_LOCALMSPID=hf.chainhero.io
+      - ORDERER_GENERAL_LOCALMSPID=hf.leadiq.com
       - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
       - ORDERER_GENERAL_TLS_ENABLED=true
       - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
@@ -285,117 +285,117 @@ services:
     command: orderer
     volumes:
       - ./artifacts/orderer.genesis.block:/var/hyperledger/orderer/orderer.genesis.block
-      - ./crypto-config/ordererOrganizations/hf.chainhero.io/orderers/orderer.hf.chainhero.io/msp:/var/hyperledger/orderer/msp
-      - ./crypto-config/ordererOrganizations/hf.chainhero.io/orderers/orderer.hf.chainhero.io/tls:/var/hyperledger/orderer/tls
+      - ./crypto-config/ordererOrganizations/hf.leadiq.com/orderers/orderer.hf.leadiq.com/msp:/var/hyperledger/orderer/msp
+      - ./crypto-config/ordererOrganizations/hf.leadiq.com/orderers/orderer.hf.leadiq.com/tls:/var/hyperledger/orderer/tls
     ports:
       - 7050:7050
     networks:
       default:
         aliases:
-          - orderer.hf.chainhero.io
+          - orderer.hf.leadiq.com
 
-  ca.org1.hf.chainhero.io:
+  ca.org1.hf.leadiq.com:
     image: hyperledger/fabric-ca:x86_64-1.0.5
-    container_name: ca.org1.hf.chainhero.io
+    container_name: ca.org1.hf.leadiq.com
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
-      - FABRIC_CA_SERVER_CA_NAME=ca.org1.hf.chainhero.io
-      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.hf.chainhero.io-cert.pem
+      - FABRIC_CA_SERVER_CA_NAME=ca.org1.hf.leadiq.com
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.hf.leadiq.com-cert.pem
       - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/--HERE--
       - FABRIC_CA_SERVER_TLS_ENABLED=true
-      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.hf.chainhero.io-cert.pem
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.hf.leadiq.com-cert.pem
       - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/--HERE--
     ports:
       - 7054:7054
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
     volumes:
-      - ./crypto-config/peerOrganizations/org1.hf.chainhero.io/ca/:/etc/hyperledger/fabric-ca-server-config
+      - ./crypto-config/peerOrganizations/org1.hf.leadiq.com/ca/:/etc/hyperledger/fabric-ca-server-config
     networks:
       default:
         aliases:
-          - ca.org1.hf.chainhero.io
+          - ca.org1.hf.leadiq.com
 
-  peer0.org1.hf.chainhero.io:
+  peer0.org1.hf.leadiq.com:
     image: hyperledger/fabric-peer:x86_64-1.0.5
-    container_name: peer0.org1.hf.chainhero.io
+    container_name: peer0.org1.hf.leadiq.com
     environment:
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - CORE_VM_DOCKER_ATTACHSTDOUT=true
       - CORE_LOGGING_LEVEL=DEBUG
-      - CORE_PEER_NETWORKID=chainhero
+      - CORE_PEER_NETWORKID=leadiq
       - CORE_PEER_PROFILE_ENABLED=true
       - CORE_PEER_TLS_ENABLED=true
       - CORE_PEER_TLS_CERT_FILE=/var/hyperledger/tls/server.crt
       - CORE_PEER_TLS_KEY_FILE=/var/hyperledger/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/var/hyperledger/tls/ca.crt
-      - CORE_PEER_ID=peer0.org1.hf.chainhero.io
+      - CORE_PEER_ID=peer0.org1.hf.leadiq.com
       - CORE_PEER_ADDRESSAUTODETECT=true
-      - CORE_PEER_ADDRESS=peer0.org1.hf.chainhero.io:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.hf.chainhero.io:7051
+      - CORE_PEER_ADDRESS=peer0.org1.hf.leadiq.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.hf.leadiq.com:7051
       - CORE_PEER_GOSSIP_USELEADERELECTION=true
       - CORE_PEER_GOSSIP_ORGLEADER=false
       - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
-      - CORE_PEER_LOCALMSPID=org1.hf.chainhero.io
+      - CORE_PEER_LOCALMSPID=org1.hf.leadiq.com
       - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/msp
-      - CORE_PEER_TLS_SERVERHOSTOVERRIDE=peer0.org1.hf.chainhero.io
+      - CORE_PEER_TLS_SERVERHOSTOVERRIDE=peer0.org1.hf.leadiq.com
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
     volumes:
       - /var/run/:/host/var/run/
-      - ./crypto-config/peerOrganizations/org1.hf.chainhero.io/peers/peer0.org1.hf.chainhero.io/msp:/var/hyperledger/msp
-      - ./crypto-config/peerOrganizations/org1.hf.chainhero.io/peers/peer0.org1.hf.chainhero.io/tls:/var/hyperledger/tls
+      - ./crypto-config/peerOrganizations/org1.hf.leadiq.com/peers/peer0.org1.hf.leadiq.com/msp:/var/hyperledger/msp
+      - ./crypto-config/peerOrganizations/org1.hf.leadiq.com/peers/peer0.org1.hf.leadiq.com/tls:/var/hyperledger/tls
     ports:
       - 7051:7051
       - 7053:7053
     depends_on:
-      - orderer.hf.chainhero.io
+      - orderer.hf.leadiq.com
     links:
-      - orderer.hf.chainhero.io
+      - orderer.hf.leadiq.com
     networks:
       default:
         aliases:
-          - peer0.org1.hf.chainhero.io
+          - peer0.org1.hf.leadiq.com
 
-  peer1.org1.hf.chainhero.io:
+  peer1.org1.hf.leadiq.com:
     image: hyperledger/fabric-peer:x86_64-1.0.5
-    container_name: peer1.org1.hf.chainhero.io
+    container_name: peer1.org1.hf.leadiq.com
     environment:
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - CORE_VM_DOCKER_ATTACHSTDOUT=true
       - CORE_LOGGING_LEVEL=DEBUG
-      - CORE_PEER_NETWORKID=chainhero
+      - CORE_PEER_NETWORKID=leadiq
       - CORE_PEER_PROFILE_ENABLED=true
       - CORE_PEER_TLS_ENABLED=true
       - CORE_PEER_TLS_CERT_FILE=/var/hyperledger/tls/server.crt
       - CORE_PEER_TLS_KEY_FILE=/var/hyperledger/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/var/hyperledger/tls/ca.crt
-      - CORE_PEER_ID=peer1.org1.hf.chainhero.io
+      - CORE_PEER_ID=peer1.org1.hf.leadiq.com
       - CORE_PEER_ADDRESSAUTODETECT=true
-      - CORE_PEER_ADDRESS=peer1.org1.hf.chainhero.io:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.org1.hf.chainhero.io:7051
+      - CORE_PEER_ADDRESS=peer1.org1.hf.leadiq.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.org1.hf.leadiq.com:7051
       - CORE_PEER_GOSSIP_USELEADERELECTION=true
       - CORE_PEER_GOSSIP_ORGLEADER=false
       - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
-      - CORE_PEER_LOCALMSPID=org1.hf.chainhero.io
+      - CORE_PEER_LOCALMSPID=org1.hf.leadiq.com
       - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/msp
-      - CORE_PEER_TLS_SERVERHOSTOVERRIDE=peer1.org1.hf.chainhero.io
+      - CORE_PEER_TLS_SERVERHOSTOVERRIDE=peer1.org1.hf.leadiq.com
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
     volumes:
       - /var/run/:/host/var/run/
-      - ./crypto-config/peerOrganizations/org1.hf.chainhero.io/peers/peer1.org1.hf.chainhero.io/msp:/var/hyperledger/msp
-      - ./crypto-config/peerOrganizations/org1.hf.chainhero.io/peers/peer1.org1.hf.chainhero.io/tls:/var/hyperledger/tls
+      - ./crypto-config/peerOrganizations/org1.hf.leadiq.com/peers/peer1.org1.hf.leadiq.com/msp:/var/hyperledger/msp
+      - ./crypto-config/peerOrganizations/org1.hf.leadiq.com/peers/peer1.org1.hf.leadiq.com/tls:/var/hyperledger/tls
     ports:
       - 8051:7051
       - 8053:7053
     depends_on:
-      - orderer.hf.chainhero.io
+      - orderer.hf.leadiq.com
     links:
-      - orderer.hf.chainhero.io
+      - orderer.hf.leadiq.com
     networks:
       default:
         aliases:
-          - peer1.org1.hf.chainhero.io
+          - peer1.org1.hf.leadiq.com
 ```
 
 **Be careful, you need to change something in the file !**
@@ -403,7 +403,7 @@ services:
 In the 'docker-compose.yaml' file you need to replace **BOTH** `--HERE--` by the name of the certificate key file located at : 
 
 ```
-heroes-service-network/crypto-config/peerOrganizations/org1.hf.chainhero.io/ca/
+heroes-service-network/crypto-config/peerOrganizations/org1.hf.leadiq.com/ca/
 ```
 
 However, as you might have seen there is 2 files located here (the certificate and the key), the name of the file you need to copy should be something like that (finish with `_sk`):
@@ -417,7 +417,7 @@ However, as you might have seen there is 2 files located here (the certificate a
 Now that your Hyperledger-Fabric Network is perfectly set up you can launch it : 
 
 ```bash
-cd $GOPATH/src/github.com/chainHero/heroes-service-network && \
+cd $GOPATH/src/github.com/leadiq/heroes-service-network && \
 docker-compose up -d
 ```
 
